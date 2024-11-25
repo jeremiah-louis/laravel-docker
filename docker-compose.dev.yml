@@ -1,0 +1,97 @@
+# Define custom network
+networks:
+  laravel:
+
+
+# Define services
+services:
+  # This represents the web server
+  nginx:
+    # Docker image to pull
+    image: nginx:stable-alpine3.20-perl
+    container_name: nginx
+    ports:
+      - "8088:80"
+    # Maps the local directory to the docker directory
+    volumes:
+      - ./src:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - laravel
+
+  # This represents the database
+  mysql:
+    image: mysql:9.1.0
+    volumes:
+      - ./mysql:/var/www/lib
+    ports:
+      - "4406:3306"
+    restart: unless-stopped
+    tty: true
+    env_file:
+      - ./src/development.env
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    networks:
+      - laravel
+  # This represents the application
+  php:
+    # Build from dockerfile
+    build:
+      # Directory to search for
+      context: .
+      dockerfile: Dockerfile
+    container_name: php
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "9000:9000"
+    networks:
+      - laravel
+    develop:
+      watch:
+        - action: 'sync'
+          path: ./src
+          target: /var/www/html
+        - action: 'rebuild'
+          path: ./src/composer.json
+        - action: 'rebuild'
+          path: ./src/composer.lock
+
+  composer:
+    image: composer:latest
+    container_name: composer
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    networks:
+      - laravel
+
+  npm:
+    image: node:latest
+    container_name: npm
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: ['npm']
+    networks:
+      - laravel
+
+  artisan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: artisan
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - mysql
+    networks:
+      - laravel
+    entrypoint: ['/var/www/html/artisan']
