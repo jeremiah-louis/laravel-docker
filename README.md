@@ -1,5 +1,5 @@
 
-### Setting Up a Laravel Development Environment with Docker Compose**
+### Setting Up a Laravel Development Environment with Docker Compose
 
 ---
 
@@ -47,9 +47,10 @@ Before you begin, ensure you have the following installed on your system:
     Use the following command to build and start the development environment:
     
     ```bash
-    docker compose --env-file src/development.env up -d --build
+    docker compose -f docker-compose.dev.yml --env-file src/development.env up -d --build
+
     ```
-    
+    - `-f docker-compose.dev.yml`: Tells Docker Compose to use the development-specific configuration file.
     - `--env-file`: Specifies the custom environment file.
     - `-d`: Runs the containers in detached mode.
     - `--build`: Ensures the containers are rebuilt with the latest changes.
