@@ -24,7 +24,7 @@ Before you begin, ensure you have the following installed on your system:
     Clone the project repository to your local machine:
     
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/jeremiah-louis/laravel-docker.git
     cd <repository-directory>
     ```
     
